@@ -1,5 +1,5 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: [:show, :edit, :update, :destroy]
+  before_action :load_product, only: %i[show edit update destroy]
 
   def index
     @products = Product.all
@@ -14,10 +14,11 @@ class ProductsController < ApplicationController
 
   def create
     @product = Product.new(product_params)
+
     if @product.save
       redirect_to @product
     else
-      render new, status: :unprocessable_entity
+      render_unprocessable(:new)
     end
   end
 
@@ -28,18 +29,22 @@ class ProductsController < ApplicationController
     if @product.update(product_params)
       redirect_to @product
     else
-      render edit, status: :unprocessable_entity,notice: 'Product was successfully edited.'
+      render_unprocessable(:edit)
     end
   end
 
   def destroy
     @product.destroy
-    redirect_to products_path, notice: 'Product was successfully deleted.'
+    redirect_to products_path
   end
 
   private
-    def set_product
+    def load_product
       @product = Product.find(params[:id])
+    end
+
+    def render_unprocessable(template)
+      render template, status: :unprocessable_entity
     end
 
     def product_params
